@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+               "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fudanyang.mapping.ClickMapper">
+
+     <select id="findById" parameterType="int" 
+        resultType="cn.fudanyang.pojo.ClickPojo">
+        select * from ndpi_demo.my_table where id=#{0}
+    </select>
+    
+    <select id="findBySrcIP" parameterType="string" 
+        resultType="cn.fudanyang.pojo.ClickPojo">
+        select * from ndpi_demo.my_table where sourceIP=#{sourceIP}
+    </select>
+    
+     <select id="findByTitle"  resultType="cn.fudanyang.pojo.ClickPojo">
+        select * from ndpi_demo.my_table where title like '%#{title}%'
+    </select>
+    <resultMap type="cn.fudanyang.pojo.ClickPojo" id="ClickMap">
+         <id     property="id" column="id"              />
+         <result property="sourceIP" column="sourceIP" jdbcType="VARCHAR" />
+         <result property="destIP" column="destIP" jdbcType="VARCHAR"/>
+         <result property="title" column="title" jdbcType="VARCHAR"/>
+         <result property="time" column="time" jdbcType="VARCHAR"/> 
+         <result property="count" column="count" /> 
+    </resultMap>
+    
+    <select id="findByMultiParamsPages" parameterType="Map"
+          resultMap="ClickMap">
+        select id,sourceIP,destIP,title,
+         <if test="selse!=null and selse!='' ">
+              count(*) as count,
+         </if>     
+          time  from ndpi_demo.my_table 
+          <where>
+             <if test="id!=null and id!='' ">
+                   id=#{id} 
+             </if>
+             <if test="sourceIP!=null and sourceIP!='' ">
+                  and sourceIP=#{sourceIP}
+             </if>
+             <if test="title!=null and title!='' ">
+                  and title like CONCAT(CONCAT('%', #{title, jdbcType=VARCHAR}),'%')
+             </if>
+             <if test="txtDate1!=null and txtDate1!='' and txtDate2!=null and txtDate2!='' " >
+                  and str_to_date(my_table.`time`,'%a %b %d %H:%i:%s %Y') between #{txtDate1} and #{txtDate2}
+             </if>          
+         </where>
+          <if test="selse!=null and selse!='' ">
+                 group by ${selse} order by count desc
+         </if>
+        limit #{startrow},#{pageSize}
+    </select>
+    
+    <select id="findAll" resultType="cn.fudanyang.pojo.ClickPojo">
+        select * from ndpi_demo.my_table
+    </select>
+    
+     <select id="findByPage"  resultType="cn.fudanyang.pojo.ClickPojo">
+        select * from ndpi_demo.my_table limit #{0},#{1}
+    </select>
+
+</mapper>
